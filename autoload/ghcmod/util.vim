@@ -106,11 +106,13 @@ endfunction "}}}
 
 function! ghcmod#util#ghc_mod_version() "{{{
   if !exists('s:ghc_mod_version')
-    let l:ghcmod = vimproc#system(['ghc-mod','version'])
+    let l:ghcmod_cmd = ghcmod#util#build_ghcmod_command(["version"])
+    let l:ghcmod = vimproc#system(l:ghcmod_cmd)
     let l:m = matchlist(l:ghcmod, 'version \(\d\+\)\.\(\d\+\)\.\(\d\+\)')
     if empty(l:m)
       if match(l:ghcmod, 'version 0 ') == -1
         call ghcmod#util#print_error(printf('ghcmod-vim: Cannot detect ghc-mod version from %s', l:ghcmod))
+        let s:ghc_mod_version = [0, 0, 1]
       else
         " 'version 0' means master
         " https://github.com/eagletmt/ghcmod-vim/issues/66
@@ -124,4 +126,11 @@ function! ghcmod#util#ghc_mod_version() "{{{
   return s:ghc_mod_version
 endfunction "}}}
 
+function! ghcmod#util#build_ghcmod_command(cmd_args) "{{{
+  if (exists("g:ghcmod_use_stack") && g:ghcmod_use_stack == 1)
+    return ["stack", "exec", "--", "ghc-mod"] + a:cmd_args
+  else
+    return ["ghc-mod"] + a:cmd_args
+  endif
+endfunction "}}}
 " vim: set ts=2 sw=2 et fdm=marker:

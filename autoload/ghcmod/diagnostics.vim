@@ -6,13 +6,25 @@ function! ghcmod#diagnostics#report()
 
   " Note: ghcmod#util#* cannot be used until vimproc.vim's availability is
   " checked.
+  "
+  echomsg 'using stack:' g:ghcmod_use_stack
 
-  let l:ghc_mod = executable('ghc-mod')
-  echomsg 'ghc-mod is executable:' l:ghc_mod
-  if !l:ghc_mod
-    echomsg '  Your $PATH:' $PATH
-    return
-  endif
+  if !exists("g:ghcmod_use_stack") || g:ghcmod_use_stack == 0 
+      let l:ghc_mod = executable('ghc-mod')
+      echomsg 'ghc-mod is executable:' l:ghc_mod
+      if !l:ghc_mod
+        echomsg '  Your $PATH:' $PATH
+        return
+      endif
+  else
+      let l:stack = executable('stack')
+      echomsg 'stack is executable:' l:stack
+      if !l:stack
+          echomsg '  Your $PATH:' $PATH
+          return
+      endif
+      echomsg "Note: doesn't check if 'stack ghc-mod' works - check that if things aren't working"
+  fi
 
   try
     echomsg 'vimproc.vim:' vimproc#version()

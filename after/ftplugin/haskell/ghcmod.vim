@@ -22,8 +22,11 @@ endif
 if !exists('s:has_ghc_mod')
   let s:has_ghc_mod = 0
 
-  if !executable('ghc-mod')
-    call ghcmod#util#print_error('ghcmod: ghc-mod is not executable!')
+  let s:ghcmodokay = (!exists("g:ghcmod_use_stack") || g:ghcmod_use_stack == 0) && executable('ghc-mod')
+  let s:stackokay = exists("g:ghcmod_use_stack") && g:ghcmod_use_stack == 1 && executable('stack')
+
+  if !s:ghcmodokay && !s:stackokay
+    call ghcmod#util#print_error('ghcmod: ghc-mod or stack (whichever is configured for use) is not executable!')
     finish
   endif
 

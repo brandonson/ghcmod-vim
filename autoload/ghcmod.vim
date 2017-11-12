@@ -245,7 +245,7 @@ function! ghcmod#add_autogen_dir(path, cmd) "{{{
 endfunction "}}}
 
 function! ghcmod#build_command(args) "{{{
-  let l:cmd = ['ghc-mod', '--silent']
+  let l:cmd = ghcmod#util#build_ghcmod_command(['--silent'])
 
   let l:dist_top  = s:find_basedir() . '/dist'
   let l:sandboxes = split(glob(l:dist_top . '/dist-*', 1), '\n')
@@ -282,7 +282,8 @@ endfunction "}}}
 function! ghcmod#system(...) "{{{
   let l:dir = getcwd()
   try
-    lcd `=ghcmod#basedir()`
+    let l:newdir = ghcmod#basedir()
+    lcd `=l:newdir`
     let l:ret = call('vimproc#system', a:000)
   finally
     lcd `=l:dir`
@@ -293,7 +294,9 @@ endfunction "}}}
 function! s:plineopen3(...) "{{{
   let l:dir = getcwd()
   try
-    lcd `=ghcmod#basedir()`
+    let l:newdir = ghcmod#basedir()
+    echomsg 'dir: ' l:newdir
+    lcd `=l:newdir`
     let l:ret = call('vimproc#plineopen3', a:000)
   finally
     lcd `=l:dir`
@@ -341,7 +344,7 @@ function! s:find_basedir() "{{{
     try
       lcd `=expand('%:p:h')`
       let b:ghcmod_basedir =
-        \ substitute(vimproc#system(['ghc-mod', '--silent', 'root']), '\n*$', '', '')
+        \ substitute(vimproc#system(ghcmod#util#build_ghcmod_command(['--silent', 'root'])), '\n*$', '', '')
     finally
       lcd `=l:dir`
     endtry
